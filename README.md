@@ -9,6 +9,7 @@ build-scan capture and other features of the gradle-build-action.
 
 All subsequent Gradle invocations will benefit from this initial setup, via `init` scripts added to the Gradle User Home.
 
+
 ```yaml
 name: Run Gradle on PRs
 on: pull_request
