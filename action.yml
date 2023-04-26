@@ -7,6 +7,7 @@ inputs:
   gradle-version:
     description: Gradle version to use
     required: false
+    default: ${{ vars.GRADLE_VERSION }}
 
   cache-disabled:
     description: When 'true', all caching is disabled. No entries will be written to or read from the cache.
