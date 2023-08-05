@@ -1,5 +1,5 @@
 diff --git a/node_modules/@actions/cache/lib/cache.d.ts b/node_modules/@actions/cache/lib/cache.d.ts
-index 4658366..b796e58 100644
+index 294a497..2e9e4a7 100644
 --- a/node_modules/@actions/cache/lib/cache.d.ts
 +++ b/node_modules/@actions/cache/lib/cache.d.ts
 @@ -21,7 +21,7 @@ export declare function isFeatureAvailable(): boolean;
@@ -11,12 +11,17 @@ index 4658366..b796e58 100644
  /**
   * Saves a list of files with the specified key
   *
-@@ -31,4 +31,12 @@ export declare function restoreCache(paths: string[], primaryKey: string, restor
+@@ -31,9 +31,17 @@ export declare function restoreCache(paths: string[], primaryKey: string, restor
   * @param options cache upload options
   * @returns number returns cacheId if the cache was saved successfully and throws an error if save fails
   */
 -export declare function saveCache(paths: string[], key: string, options?: UploadOptions, enableCrossOsArchive?: boolean): Promise<number>;
 +export declare function saveCache(paths: string[], key: string, options?: UploadOptions, enableCrossOsArchive?: boolean): Promise<CacheEntry>;
+ /**
+  * Delete a list of caches with the specified keys
+  * @param keys a list of keys for deleting the cache
+  */
+ export declare function deleteCache(keys: string[]): Promise<void>;
 +
 +// PATCHED: Add `CacheEntry` as return type for save/restore functions
 +// This allows us to track and report on cache entry sizes.
@@ -26,13 +31,13 @@ index 4658366..b796e58 100644
 +    constructor(key: string, size?: number);
 +}
 diff --git a/node_modules/@actions/cache/lib/cache.js b/node_modules/@actions/cache/lib/cache.js
-index 9d636aa..a176bd7 100644
+index 4f8d069..abb7a94 100644
 --- a/node_modules/@actions/cache/lib/cache.js
 +++ b/node_modules/@actions/cache/lib/cache.js
-@@ -127,18 +127,21 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
-             core.info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
-             yield (0, tar_1.extractTar)(archivePath, compressionMethod);
-             core.info('Cache restored successfully');
+@@ -141,18 +141,21 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
+                 downloadTimeMs,
+                 extractTimeMs
+             });
 -            return cacheEntry.cacheKey;
 -        }
 -        catch (error) {
@@ -62,10 +67,10 @@ index 9d636aa..a176bd7 100644
          finally {
              // Try to delete the archive to save space
              try {
-@@ -206,19 +209,23 @@ function saveCache(paths, key, options, enableCrossOsArchive = false) {
+@@ -226,19 +229,23 @@ function saveCache(paths, key, options, enableCrossOsArchive = false) {
              }
-             core.debug(`Saving Cache (ID: ${cacheId})`);
-             yield cacheHttpClient.saveCache(cacheId, archivePath, options);
+             core.debug(`Saving Cache (ID: ${uploadId})`);
+             yield cacheHttpClient.saveCache(key, version, uploadId, urls, archivePath, archiveTimeMs, options);
 +
 +            // PATCHED - Return more inforamtion about saved entry
 +            return new CacheEntry(key, archiveFileSize);
@@ -98,10 +103,10 @@ index 9d636aa..a176bd7 100644
          finally {
              // Try to delete the archive to save space
              try {
-@@ -232,4 +239,11 @@ function saveCache(paths, key, options, enableCrossOsArchive = false) {
+@@ -270,4 +277,11 @@ function deleteCache(keys) {
      });
  }
- exports.saveCache = saveCache;
+ exports.deleteCache = deleteCache;
 +class CacheEntry {
 +    constructor(key, size) {
 +        this.key = key;
@@ -110,4 +115,3 @@ index 9d636aa..a176bd7 100644
 +}
 +exports.CacheEntry = CacheEntry;
  //# sourceMappingURL=cache.js.map
-\ No newline at end of file
