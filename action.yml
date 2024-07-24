@@ -15,6 +15,7 @@ inputs:
   build-root-directory:
     description: Path to the root directory of the build. Default is the root of the GitHub workspace.
     required: false
+    default: ${{ vars.GRADLE_VERSION }}
 
   cache-disabled:
     description: When 'true', all caching is disabled. No entries will be written to or read from the cache.
