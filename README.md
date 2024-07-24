@@ -25,6 +25,7 @@ The `gradle-build-action` works by configuring environment variables and by addi
 This means that if you have an existing workflow that executes Gradle with a `run` step, you can add an initial "Setup Gradle" Step to benefit from caching, build-scan capture and other features of the gradle-build-action.
 
 
+
 ```yaml
 name: Run Gradle on PRs
 on: pull_request
